@@ -9,7 +9,7 @@ import {
   MenuItem,
   Box
 } from '@mui/material';
-import { Add as AddIcon } from '@mui/icons-material';
+import { Add as AddIcon, Search as SearchIcon, FilterList as FilterIcon } from '@mui/icons-material';
 import RepairItem from '../components/RepairItem';
 import Loading from '../components/Loading';
 import { getRepairs } from '../features/repairs/repairSlice';

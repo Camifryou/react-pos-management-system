@@ -18,6 +18,7 @@ import { Add as AddIcon, AddCircleOutline, RemoveCircleOutline } from '@mui/icon
 import PartItem from '../components/PartItem';
 import Loading from '../components/Loading';
 import { getParts, createPart, updatePart, deletePart } from '../features/parts/partSlice';
+import { FaPlus, FaSearch, FaBoxOpen, FaExclamationTriangle } from 'react-icons/fa';
 
 const partTypes = [
   'Screen',
@@ -55,7 +56,7 @@ const initialFormState = {
 const Parts = () => {
   const dispatch = useDispatch();
   const [searchTerm, setSearchTerm] = useState('');
-  const [typeFilter, setTypeFilter] = useState('');
+  const [filterCategory, setFilterCategory] = useState('all');
   const [openDialog, setOpenDialog] = useState(false);
   const [formData, setFormData] = useState(initialFormState);
   const [editingId, setEditingId] = useState(null);
@@ -128,7 +129,7 @@ const Parts = () => {
   };
 
   const filteredParts = parts.filter(part => {
-    const matchesType = !typeFilter || part.type === typeFilter;
+    const matchesType = !filterCategory || part.type === filterCategory;
     const matchesSearch = !searchTerm || 
       part.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       part.sku.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -141,61 +142,84 @@ const Parts = () => {
   if (error) return <Typography color="error">{error}</Typography>;
 
   return (
-    <Container maxWidth="lg">
-      <Stack direction="row" justifyContent="space-between" alignItems="center" mb={4}>
-        <Typography variant="h4">Partes y Repuestos</Typography>
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          onClick={() => handleOpenDialog()}
-        >
-          Nueva Parte
-        </Button>
-      </Stack>
+    <div>
+      <div className="flex flex-between flex-center">
+        <h1>Repuestos</h1>
+        <button className="btn btn-primary" onClick={() => handleOpenDialog()}>
+          <FaPlus />
+          Nuevo Repuesto
+        </button>
+      </div>
 
-      <Stack direction="row" spacing={2} mb={4}>
-        <TextField
-          label="Buscar"
-          variant="outlined"
-          size="small"
-          fullWidth
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
-        <TextField
-          select
-          label="Tipo"
-          value={typeFilter}
-          onChange={(e) => setTypeFilter(e.target.value)}
-          variant="outlined"
-          size="small"
-          sx={{ minWidth: 200 }}
-        >
-          <MenuItem value="">Todos</MenuItem>
-          {partTypes.map((type) => (
-            <MenuItem key={type} value={type}>
-              {type}
-            </MenuItem>
-          ))}
-        </TextField>
-      </Stack>
+      <div className="card">
+        <div className="flex flex-between flex-center">
+          <div className="form-group" style={{ width: '300px', marginBottom: 0 }}>
+            <div className="flex">
+              <input
+                type="text"
+                className="form-control"
+                placeholder="Buscar repuesto..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+              <button className="btn btn-primary" style={{ marginLeft: '8px' }}>
+                <FaSearch />
+              </button>
+            </div>
+          </div>
 
-      {filteredParts.length === 0 ? (
-        <Typography variant="body1" color="text.secondary" textAlign="center">
-          No se encontraron partes
-        </Typography>
-      ) : (
-        <Stack spacing={2}>
-          {filteredParts.map((part) => (
-            <PartItem
-              key={part._id}
-              part={part}
-              onEdit={() => handleOpenDialog(part)}
-              onDelete={handleDelete}
-            />
-          ))}
-        </Stack>
-      )}
+          <select
+            className="form-control"
+            value={filterCategory}
+            onChange={(e) => setFilterCategory(e.target.value)}
+            style={{ width: 'auto' }}
+          >
+            <option value="all">Todas las categorías</option>
+            <option value="screens">Pantallas</option>
+            <option value="batteries">Baterías</option>
+            <option value="cameras">Cámaras</option>
+          </select>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-3">
+        {filteredParts.map((part) => (
+          <div key={part._id} className="card">
+            <div className="flex flex-between">
+              <h3>{part.name}</h3>
+              <button className="btn btn-primary" onClick={() => handleOpenDialog(part)}>Editar</button>
+            </div>
+            <div style={{ marginTop: '16px' }}>
+              <div className="flex flex-between" style={{ marginBottom: '16px' }}>
+                <div className="flex flex-center" style={{ gap: '8px' }}>
+                  <FaBoxOpen />
+                  <span>Stock: {part.stock.current}</span>
+                </div>
+                {part.stock.current < part.stock.minimum && (
+                  <span className="badge badge-warning flex flex-center" style={{ gap: '4px' }}>
+                    <FaExclamationTriangle />
+                    Bajo stock
+                  </span>
+                )}
+              </div>
+              <p style={{ marginBottom: '8px' }}>
+                <strong>Precio:</strong> ${part.price.sale}
+              </p>
+              <p style={{ marginBottom: '16px' }}>
+                <strong>Compatibilidad:</strong>
+                <br />
+                {part.compatibility.map((comp) => (
+                  <span key={comp.brand + comp.model}>{comp.brand} {comp.model}, </span>
+                ))}
+              </p>
+              <div className="flex flex-between">
+                <button className="btn btn-warning">Ajustar stock</button>
+                <button className="btn btn-success">Ordenar más</button>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
 
       <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="md" fullWidth>
         <DialogTitle>
@@ -392,7 +416,7 @@ const Parts = () => {
           </DialogActions>
         </form>
       </Dialog>
-    </Container>
+    </div>
   );
 };
 

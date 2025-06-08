@@ -16,6 +16,7 @@ import { Add as AddIcon } from '@mui/icons-material';
 import CustomerItem from '../components/CustomerItem';
 import Loading from '../components/Loading';
 import { getCustomers, createCustomer, updateCustomer, deleteCustomer } from '../features/customers/customerSlice';
+import { FaPlus, FaSearch, FaPhone, FaEnvelope } from 'react-icons/fa';
 
 const initialFormState = {
   name: '',
@@ -86,44 +87,56 @@ const Customers = () => {
   if (error) return <Typography color="error">{error}</Typography>;
 
   return (
-    <Container maxWidth="lg">
-      <Stack direction="row" justifyContent="space-between" alignItems="center" mb={4}>
-        <Typography variant="h4">Clientes</Typography>
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          onClick={() => handleOpenDialog()}
-        >
+    <div>
+      <div className="flex flex-between flex-center">
+        <h1>Clientes</h1>
+        <button className="btn btn-primary" onClick={() => handleOpenDialog()}>
+          <FaPlus />
           Nuevo Cliente
-        </Button>
-      </Stack>
+        </button>
+      </div>
 
-      <TextField
-        label="Buscar"
-        variant="outlined"
-        size="small"
-        fullWidth
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-        sx={{ mb: 4 }}
-      />
-
-      {filteredCustomers.length === 0 ? (
-        <Typography variant="body1" color="text.secondary" textAlign="center">
-          No se encontraron clientes
-        </Typography>
-      ) : (
-        <Stack spacing={2}>
-          {filteredCustomers.map((customer) => (
-            <CustomerItem
-              key={customer._id}
-              customer={customer}
-              onEdit={() => handleOpenDialog(customer)}
-              onDelete={handleDelete}
+      <div className="card">
+        <div className="form-group" style={{ width: '300px', marginBottom: 0 }}>
+          <div className="flex">
+            <input
+              type="text"
+              className="form-control"
+              placeholder="Buscar cliente..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
             />
-          ))}
-        </Stack>
-      )}
+            <button className="btn btn-primary" style={{ marginLeft: '8px' }}>
+              <FaSearch />
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-3">
+        {filteredCustomers.map((customer) => (
+          <div key={customer._id} className="card">
+            <div className="flex flex-between">
+              <h3>{customer.name}</h3>
+              <button className="btn btn-primary" onClick={() => handleOpenDialog(customer)}>Ver detalles</button>
+            </div>
+            <div style={{ marginTop: '16px' }}>
+              <p className="flex flex-center" style={{ gap: '8px', marginBottom: '8px' }}>
+                <FaPhone />
+                {customer.phone}
+              </p>
+              <p className="flex flex-center" style={{ gap: '8px', marginBottom: '16px' }}>
+                <FaEnvelope />
+                {customer.email}
+              </p>
+              <div className="flex flex-between" style={{ color: 'var(--text-secondary)' }}>
+                <span>Reparaciones: {customer.repairs}</span>
+                <span>Última visita: {new Date(customer.lastVisit).toLocaleDateString()}</span>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
 
       <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
         <DialogTitle>
@@ -224,7 +237,7 @@ const Customers = () => {
           </DialogActions>
         </form>
       </Dialog>
-    </Container>
+    </div>
   );
 };
 
