@@ -1,12 +1,8 @@
 import React from "react";
 import { useNavigate, Link } from "react-router-dom";
 import {
-  FaHome,
-  FaShoppingCart,
-  FaShopify,
   FaUserCircle,
   FaSignInAlt,
-  FaWpforms,
   FaTools,
   FaUsers,
   FaCogs,
