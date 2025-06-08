@@ -6,6 +6,9 @@ const authRoutes = require('./routes/authRoutes')
 const categoryRoutes = require('./routes/categoryRoutes')
 const productRoutes = require('./routes/productRoutes')
 const orderRoutes = require('./routes/orderRoutes')
+const repairRoutes = require('./routes/repairRoutes')
+const customerRoutes = require('./routes/customerRoutes')
+const partRoutes = require('./routes/partRoutes')
 const cookieParser = require('cookie-parser')
 const cors = require('cors')
 
@@ -29,13 +32,16 @@ app.use(express.urlencoded({ extended: false }))
 
 // ROUTES
 app.get('/', (req, res) => {
-    res.send('Welcome')
+    res.send('Welcome to Phone Repair Shop Management System')
 })
 
 app.use('/api/auth', authRoutes)
 app.use('/api/category', categoryRoutes)
 app.use('/api/product', productRoutes)
 app.use('/api/order', orderRoutes)
+app.use('/api/repairs', repairRoutes)
+app.use('/api/customers', customerRoutes)
+app.use('/api/parts', partRoutes)
 
 // Middleware
 app.use(errorHandler)
