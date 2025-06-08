@@ -1,7 +1,7 @@
 import React from "react";
 import { Outlet } from "react-router-dom";
 import SidebarLeft from "../components/SidebarLeft";
-import ShoppingCart from "../pages/ShoppingCart";
+
 const Dashboard = () => {
   return (
     <>
@@ -10,13 +10,9 @@ const Dashboard = () => {
           <SidebarLeft />
         </div>
 
-        {/* Dynamic Page */}
+        {/* Main Content Area */}
         <div className="main-content">
           <Outlet />
-        </div>
-
-        <div className="sidebarRight">
-          <ShoppingCart />
         </div>
       </div>
     </>

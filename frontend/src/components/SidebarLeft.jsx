@@ -7,6 +7,9 @@ import {
   FaUserCircle,
   FaSignInAlt,
   FaWpforms,
+  FaTools,
+  FaUsers,
+  FaCogs,
 } from "react-icons/fa";
 import { useSelector, useDispatch } from "react-redux";
 import { logout, reset } from "../features/auth/authSlice";
@@ -24,25 +27,33 @@ const SidebarLeft = () => {
   };
 
   return (
-    <>
-      <div className="menu-links">
-        <Link to="/dashboard">
-          <FaHome className="menu-icon" />
-          Home
-        </Link>
-        <Link to="/dashboard/orders">
-          <FaShopify className="menu-icon" />
-          Orders
-        </Link>
-        <Link to="/dashboard/form">
-          <FaWpforms className="menu-icon" />
-          Form
-        </Link>
-        <Link to="/cart">
-          <FaShoppingCart className="menu-icon" />
-          Cart
-        </Link>
+    <div className="sidebar">
+      <div className="logo">
+        <h2>Phone Repair Shop</h2>
       </div>
+      
+      <nav>
+        <ul>
+          <li>
+            <Link to="/" className="menu-item">
+              <FaTools className="icon" />
+              <span>Reparaciones</span>
+            </Link>
+          </li>
+          <li>
+            <Link to="/customers" className="menu-item">
+              <FaUsers className="icon" />
+              <span>Clientes</span>
+            </Link>
+          </li>
+          <li>
+            <Link to="/parts" className="menu-item">
+              <FaCogs className="icon" />
+              <span>Repuestos</span>
+            </Link>
+          </li>
+        </ul>
+      </nav>
 
       <div className="user-info">
         <div className="user-detail">
@@ -53,7 +64,7 @@ const SidebarLeft = () => {
           <FaSignInAlt className="logout-icon" />
         </button>
       </div>
-    </>
+    </div>
   );
 };
 

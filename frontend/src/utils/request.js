@@ -5,7 +5,9 @@ const httpRequest = axios.create({
         "Accept": "application/json",
         "Content-Type": "application/json",
     },
-    baseURL: "https://react-pos-management-system.vercel.app/api",
+    baseURL: process.env.NODE_ENV === 'production' 
+        ? '/api'
+        : 'http://localhost:8000/api',
     withCredentials: true,
 })
 
