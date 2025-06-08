@@ -1,109 +1,131 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import {
-  Container,
-  Typography,
-  Button,
-  Stack,
-  TextField,
-  MenuItem,
-  Box
-} from '@mui/material';
-import { Add as AddIcon, Search as SearchIcon, FilterList as FilterIcon } from '@mui/icons-material';
-import RepairItem from '../components/RepairItem';
-import Loading from '../components/Loading';
+import { FaPlus, FaSearch, FaFilter } from 'react-icons/fa';
 import { getRepairs } from '../features/repairs/repairSlice';
-
-const statusFilters = [
-  'Todas',
-  'Pending',
-  'Diagnosed',
-  'In Progress',
-  'Waiting Parts',
-  'Completed',
-  'Delivered',
-  'Cancelled'
-];
+import Loading from '../components/Loading';
 
 const Repairs = () => {
   const dispatch = useDispatch();
-  const [statusFilter, setStatusFilter] = useState('Todas');
+  const { repairs, isLoading } = useSelector((state) => state.repairs);
   const [searchTerm, setSearchTerm] = useState('');
-
-  const { repairs, isLoading, error } = useSelector(state => state.repairs);
+  const [filterStatus, setFilterStatus] = useState('all');
 
   useEffect(() => {
     dispatch(getRepairs());
   }, [dispatch]);
 
-  const handleNewRepair = () => {
-    // TODO: Implementar navegación a formulario de nueva reparación
+  const getStatusBadgeClass = (status) => {
+    switch (status) {
+      case 'pending':
+        return 'badge badge-pending';
+      case 'in_progress':
+        return 'badge badge-progress';
+      case 'completed':
+        return 'badge badge-completed';
+      default:
+        return 'badge';
+    }
   };
 
-  const filteredRepairs = repairs.filter(repair => {
-    const matchesStatus = statusFilter === 'Todas' || repair.status === statusFilter;
-    const matchesSearch = searchTerm === '' || 
-      repair.customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      repair.device.brand.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      repair.device.model.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    return matchesStatus && matchesSearch;
-  });
+  const getStatusText = (status) => {
+    switch (status) {
+      case 'pending':
+        return 'Pendiente';
+      case 'in_progress':
+        return 'En Progreso';
+      case 'completed':
+        return 'Completado';
+      default:
+        return status;
+    }
+  };
 
-  if (isLoading) return <Loading />;
-  if (error) return <Typography color="error">{error}</Typography>;
+  if (isLoading) {
+    return <Loading />;
+  }
 
   return (
-    <Container maxWidth="lg">
-      <Stack direction="row" justifyContent="space-between" alignItems="center" mb={4}>
-        <Typography variant="h4">Reparaciones</Typography>
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          onClick={handleNewRepair}
-        >
+    <div>
+      <div className="flex flex-between flex-center">
+        <h1>Reparaciones</h1>
+        <button className="btn btn-primary">
+          <FaPlus />
           Nueva Reparación
-        </Button>
-      </Stack>
+        </button>
+      </div>
 
-      <Stack direction="row" spacing={2} mb={4}>
-        <TextField
-          label="Buscar"
-          variant="outlined"
-          size="small"
-          fullWidth
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
-        <TextField
-          select
-          label="Estado"
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-          variant="outlined"
-          size="small"
-          sx={{ minWidth: 200 }}
-        >
-          {statusFilters.map((status) => (
-            <MenuItem key={status} value={status}>
-              {status}
-            </MenuItem>
-          ))}
-        </TextField>
-      </Stack>
+      <div className="card">
+        <div className="flex flex-between flex-center">
+          <div className="form-group" style={{ width: '300px', marginBottom: 0 }}>
+            <div className="flex">
+              <input
+                type="text"
+                className="form-control"
+                placeholder="Buscar reparación..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+              <button className="btn btn-primary" style={{ marginLeft: '8px' }}>
+                <FaSearch />
+              </button>
+            </div>
+          </div>
 
-      {filteredRepairs.length === 0 ? (
-        <Typography variant="body1" color="text.secondary" textAlign="center">
-          No se encontraron reparaciones
-        </Typography>
-      ) : (
-        <Stack spacing={2}>
-          {filteredRepairs.map((repair) => (
-            <RepairItem key={repair._id} repair={repair} />
-          ))}
-        </Stack>
-      )}
-    </Container>
+          <div className="flex flex-center">
+            <FaFilter style={{ marginRight: '8px' }} />
+            <select
+              className="form-control"
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value)}
+              style={{ width: 'auto' }}
+            >
+              <option value="all">Todos los estados</option>
+              <option value="pending">Pendiente</option>
+              <option value="in_progress">En Progreso</option>
+              <option value="completed">Completado</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div className="card table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Cliente</th>
+              <th>Dispositivo</th>
+              <th>Problema</th>
+              <th>Fecha</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {repairs.map((repair) => (
+              <tr key={repair._id}>
+                <td>#{repair._id.slice(-4)}</td>
+                <td>{repair.customer.name}</td>
+                <td>{repair.device.brand} {repair.device.model}</td>
+                <td>{repair.issue.description}</td>
+                <td>{new Date(repair.dates.received).toLocaleDateString()}</td>
+                <td>
+                  <span className={getStatusBadgeClass(repair.status)}>
+                    {getStatusText(repair.status)}
+                  </span>
+                </td>
+                <td>
+                  <div className="flex" style={{ gap: '8px' }}>
+                    <button className="btn btn-warning">Ver</button>
+                    <button className="btn btn-primary">Editar</button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
   );
 };
 
