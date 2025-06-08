@@ -1,104 +1,54 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
+import httpRequest from '../../utils/request';
 
-const API_URL = '/api/repairs';
-
-// Get all repairs
+// Get repairs
 export const getRepairs = createAsyncThunk(
   'repairs/getAll',
   async (_, thunkAPI) => {
     try {
-      const token = thunkAPI.getState().auth.user.token;
-      const config = {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      };
-      const response = await axios.get(API_URL, config);
+      const response = await httpRequest.get('/repairs');
       return response.data;
     } catch (error) {
-      const message = error.response?.data?.message || error.message;
-      return thunkAPI.rejectWithValue(message);
+      return thunkAPI.rejectWithValue(error.response.data);
     }
   }
 );
 
-// Create new repair
+// Create repair
 export const createRepair = createAsyncThunk(
   'repairs/create',
   async (repairData, thunkAPI) => {
     try {
-      const token = thunkAPI.getState().auth.user.token;
-      const config = {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      };
-      const response = await axios.post(API_URL, repairData, config);
+      const response = await httpRequest.post('/repairs', repairData);
       return response.data;
     } catch (error) {
-      const message = error.response?.data?.message || error.message;
-      return thunkAPI.rejectWithValue(message);
+      return thunkAPI.rejectWithValue(error.response.data);
     }
   }
 );
 
-// Update repair status
-export const updateRepairStatus = createAsyncThunk(
-  'repairs/updateStatus',
-  async ({ id, status }, thunkAPI) => {
+// Update repair
+export const updateRepair = createAsyncThunk(
+  'repairs/update',
+  async ({ id, repairData }, thunkAPI) => {
     try {
-      const token = thunkAPI.getState().auth.user.token;
-      const config = {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      };
-      const response = await axios.put(`${API_URL}/${id}/status`, { status }, config);
+      const response = await httpRequest.put(`/repairs/${id}`, repairData);
       return response.data;
     } catch (error) {
-      const message = error.response?.data?.message || error.message;
-      return thunkAPI.rejectWithValue(message);
+      return thunkAPI.rejectWithValue(error.response.data);
     }
   }
 );
 
-// Add parts to repair
-export const addRepairParts = createAsyncThunk(
-  'repairs/addParts',
-  async ({ id, parts }, thunkAPI) => {
+// Delete repair
+export const deleteRepair = createAsyncThunk(
+  'repairs/delete',
+  async (id, thunkAPI) => {
     try {
-      const token = thunkAPI.getState().auth.user.token;
-      const config = {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      };
-      const response = await axios.put(`${API_URL}/${id}/parts`, { parts }, config);
-      return response.data;
+      await httpRequest.delete(`/repairs/${id}`);
+      return id;
     } catch (error) {
-      const message = error.response?.data?.message || error.message;
-      return thunkAPI.rejectWithValue(message);
-    }
-  }
-);
-
-// Update repair diagnosis
-export const updateRepairDiagnosis = createAsyncThunk(
-  'repairs/updateDiagnosis',
-  async ({ id, diagnosis }, thunkAPI) => {
-    try {
-      const token = thunkAPI.getState().auth.user.token;
-      const config = {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      };
-      const response = await axios.put(`${API_URL}/${id}/diagnosis`, { diagnosis }, config);
-      return response.data;
-    } catch (error) {
-      const message = error.response?.data?.message || error.message;
-      return thunkAPI.rejectWithValue(message);
+      return thunkAPI.rejectWithValue(error.response.data);
     }
   }
 );
@@ -106,8 +56,8 @@ export const updateRepairDiagnosis = createAsyncThunk(
 const initialState = {
   repairs: [],
   isLoading: false,
-  error: null,
-  success: false,
+  isSuccess: false,
+  isError: false,
   message: ''
 };
 
@@ -117,58 +67,67 @@ const repairSlice = createSlice({
   reducers: {
     reset: (state) => {
       state.isLoading = false;
-      state.error = null;
-      state.success = false;
+      state.isSuccess = false;
+      state.isError = false;
       state.message = '';
     }
   },
   extraReducers: (builder) => {
     builder
-      // Get all repairs
       .addCase(getRepairs.pending, (state) => {
         state.isLoading = true;
       })
       .addCase(getRepairs.fulfilled, (state, action) => {
         state.isLoading = false;
+        state.isSuccess = true;
         state.repairs = action.payload;
       })
       .addCase(getRepairs.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.payload;
+        state.isError = true;
+        state.message = action.payload;
       })
-      // Create repair
       .addCase(createRepair.pending, (state) => {
         state.isLoading = true;
       })
       .addCase(createRepair.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.success = true;
+        state.isSuccess = true;
         state.repairs.push(action.payload);
       })
       .addCase(createRepair.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.payload;
+        state.isError = true;
+        state.message = action.payload;
       })
-      // Update repair status
-      .addCase(updateRepairStatus.fulfilled, (state, action) => {
+      .addCase(updateRepair.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(updateRepair.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.isSuccess = true;
         const index = state.repairs.findIndex(repair => repair._id === action.payload._id);
         if (index !== -1) {
           state.repairs[index] = action.payload;
         }
       })
-      // Add repair parts
-      .addCase(addRepairParts.fulfilled, (state, action) => {
-        const index = state.repairs.findIndex(repair => repair._id === action.payload._id);
-        if (index !== -1) {
-          state.repairs[index] = action.payload;
-        }
+      .addCase(updateRepair.rejected, (state, action) => {
+        state.isLoading = false;
+        state.isError = true;
+        state.message = action.payload;
       })
-      // Update repair diagnosis
-      .addCase(updateRepairDiagnosis.fulfilled, (state, action) => {
-        const index = state.repairs.findIndex(repair => repair._id === action.payload._id);
-        if (index !== -1) {
-          state.repairs[index] = action.payload;
-        }
+      .addCase(deleteRepair.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(deleteRepair.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.isSuccess = true;
+        state.repairs = state.repairs.filter(repair => repair._id !== action.payload);
+      })
+      .addCase(deleteRepair.rejected, (state, action) => {
+        state.isLoading = false;
+        state.isError = true;
+        state.message = action.payload;
       });
   }
 });
