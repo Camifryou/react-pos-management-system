@@ -8,22 +8,21 @@ const {
   addRepairParts,
   updateRepairDiagnosis
 } = require('../controllers/repairController');
-const { protect } = require('../middleware/authMiddleware');
 
 router.route('/')
-  .post(protect, createRepair)
-  .get(protect, getRepairs);
+  .post(createRepair)
+  .get(getRepairs);
 
 router.route('/:id')
-  .get(protect, getRepairById);
+  .get(getRepairById);
 
 router.route('/:id/status')
-  .put(protect, updateRepairStatus);
+  .put(updateRepairStatus);
 
 router.route('/:id/parts')
-  .put(protect, addRepairParts);
+  .put(addRepairParts);
 
 router.route('/:id/diagnosis')
-  .put(protect, updateRepairDiagnosis);
+  .put(updateRepairDiagnosis);
 
 module.exports = router; 
