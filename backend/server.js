@@ -19,13 +19,11 @@ connectDatabase()
 const app = express()
 
 const corsOrigin = {
-    origin: [
-        'http://localhost:3000',
-        'https://phone-repair-shop.vercel.app',
-        process.env.FRONTEND_URL,
-    ], 
-    credentials: true,            
+    origin: '*',
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
 }
+
 app.use(cors(corsOrigin))
 app.use(cookieParser())
 app.use(express.json())
